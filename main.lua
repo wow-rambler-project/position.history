@@ -6,12 +6,12 @@
 local AddonName = ...
 
 local mainFrame = CreateFrame("Frame", nil, UIParent)
+mainFrame.events = {}
 
-local zeroVector = CreateVector2D(0, 0)
-local unitVector = CreateVector2D(1, 1)
-local playerPosition = CreateVector2D(0,0)
+local ZeroVector = CreateVector2D(0, 0)
+local UnitVector = CreateVector2D(1, 1)
 
-function MonitorPosition()
+local function MonitorPosition()
 	local uiMapID = C_Map.GetBestMapForUnit("player")
 
 	if not uiMapID then
@@ -24,8 +24,8 @@ function MonitorPosition()
 	if not worldPosition then
 		worldPosition = {}
 		local _
-		_, worldPosition[1] = C_Map.GetWorldPosFromMapPos(uiMapID, zeroVector)
-		_, worldPosition[2] = C_Map.GetWorldPosFromMapPos(uiMapID, unitVector)
+		_, worldPosition[1] = C_Map.GetWorldPosFromMapPos(uiMapID, ZeroVector)
+		_, worldPosition[2] = C_Map.GetWorldPosFromMapPos(uiMapID, UnitVector)
 
 		-- Exile's Reach - North Sea: returns nil.
 		if not worldPosition[1] or not worldPosition[2] then
@@ -40,18 +40,30 @@ function MonitorPosition()
 		}
 	end
 
-	playerPosition.x, playerPosition.y = UnitPosition('player')
+	local y, x, _, instanceID = UnitPosition('player')
 
 	WoWRamblerProjectPositionHistory[GetServerTime()] = {
-		["map"] = uiMapID,
-		["x"] = playerPosition.x,
-		["y"] = playerPosition.y,
-		["combat"] = UnitAffectingCombat("player")
+		["map id"] = uiMapID,
+		["instance id"] = instanceID,
+		["instance x"] = x or "nil",
+		["instance y"] = y or "nil",
+		["combat"] = UnitAffectingCombat("player"),
+		["target GUID"] = UnitGUID("target") or "nil"
 	}
 end
 
-function mainFrame:OnEvent(event, param)
-	if event == "ADDON_LOADED" and param == AddonName then
+function mainFrame:SetupEvents()
+	self:SetScript("OnEvent", function(self, event, ...)
+		self.events[event](self, ...)
+	end)
+
+	for k, v in pairs(self.events) do
+		self:RegisterEvent(k)
+	end
+end
+
+function mainFrame.events:ADDON_LOADED(addonName)
+	if addonName == AddonName then
 		WoWRamblerProjectPositionHistory = WoWRamblerProjectPositionHistory or {}
 		WoWRamblerProjectMapsCache = WoWRamblerProjectMapsCache or {}
 
@@ -59,5 +71,4 @@ function mainFrame:OnEvent(event, param)
 	end
 end
 
-mainFrame:RegisterEvent("ADDON_LOADED")
-mainFrame:SetScript("OnEvent", mainFrame.OnEvent)
+mainFrame:SetupEvents()
