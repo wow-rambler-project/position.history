@@ -44,7 +44,7 @@ local function MonitorPosition()
 
 	WoWRamblerProjectPositionHistory[GetServerTime()] = {
 		["map id"] = uiMapID,
-		["instance id"] = instanceID,
+		["instance id"] = instanceID or "nil",
 		["instance x"] = x or "nil",
 		["instance y"] = y or "nil",
 		["combat"] = UnitAffectingCombat("player"),
