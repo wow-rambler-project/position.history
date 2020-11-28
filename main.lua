@@ -40,15 +40,23 @@ local function MonitorPosition()
 		}
 	end
 
-	local y, x, _, instanceID = UnitPosition('player')
+	local y, x, _, instanceID = UnitPosition("player")
 
 	WoWRamblerProjectPositionHistory[GetServerTime()] = {
+		["money"] = GetMoney(), -- Time is money, friend!
+		["direction"] = GetPlayerFacing(),
+		["dead"] = UnitIsDeadOrGhost("player") or nil,
 		["map id"] = uiMapID,
-		["instance id"] = instanceID or "nil",
-		["instance x"] = x or "nil",
-		["instance y"] = y or "nil",
-		["combat"] = UnitAffectingCombat("player"),
-		["target GUID"] = UnitGUID("target") or "nil"
+		["instance id"] = instanceID,
+		["instance x"] = x,
+		["instance y"] = y,
+		["mounted"] = IsMounted() or nil,
+		["on taxi"] = UnitOnTaxi("player") or nil,
+		["flying"] = IsFlying() or nil,
+		["combat"] = UnitAffectingCombat("player") or nil, -- No combat, no data.
+		["target GUID"] = UnitGUID("target"), -- No target, no data.
+		["target name"] = UnitName("target") -- No target, no data.
+		-- Name can be datamined through the target's GUID, though it is handy to have it in plain text.
 	}
 end
 
