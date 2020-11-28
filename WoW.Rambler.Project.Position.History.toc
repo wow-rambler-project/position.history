@@ -1,4 +1,4 @@
-## Interface: 90001
+## Interface: 90002
 ## Title: WoW.Rambler.Project.Position.History
 ## Notes: WoW Rambler Project Position History Addon
 ## Version: 1.0
